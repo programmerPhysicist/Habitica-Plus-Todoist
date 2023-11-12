@@ -12,6 +12,10 @@ import requests
 import pickle
 #import todoist
 from todoist_api_python.api import TodoistAPI
+from todoist_api_python.endpoints import get_sync_url
+from todoist_api_python.http_requests import get
+from todoist_api_python.models import CompletedItems
+from todoist_api_python.models import Task
 import main
 import random
 import json
@@ -33,6 +37,22 @@ def get_tasks(token):
     except Exception as error:
         print(error)
     return tasks, api
+
+def dict_to_Task(obj, url):
+    obj['comment_count'] = obj['note_count']
+    obj['is_completed'] = (obj['completed_at'] != '')
+    obj['created_at'] = "unknown"
+    obj['creator_id'] = obj['user_id']
+    obj['description'] = obj['content']
+    obj["priority"] = ''
+    obj['url'] = url
+    return Task.from_dict(obj)
+
+def get_all_completed_items(api):
+    url = get_sync_url('completed/get_all')
+    completed_items = get(api._session, url, api._token)
+    tasks = completed_items['items']
+    return [dict_to_Task(obj, url) for obj in tasks]
 
 # todayFilter = todoApi.filters.add('todayFilter', 'today')
 
@@ -69,7 +89,8 @@ matchDict = main.update_tod_matchDict(tod_tasks, matchDict)
 matchDict = main.update_hab_matchDict(hab_tasks, matchDict)
 
 #We'll want to just... pull all the unmatched completed tasks out of our lists of tasks. Yeah? 
-tod_uniq, hab_uniq = main.get_uniqs(matchDict, tod_tasks, hab_tasks)
+tod_done = [TodTask(task) for task in get_all_completed_items(todoApi)]
+tod_uniq, hab_uniq = main.get_uniqs(matchDict, tod_done, hab_tasks)
 
 #Okay, so what if there are two matched tasks in the two uniq lists that really should be paired?
 matchDict = main.check_newMatches(matchDict,tod_uniq,hab_uniq)
@@ -90,7 +111,7 @@ for tod in tod_uniq:
     if r.ok == False:
         errMsg = r.json()['errors'][0]['message']
         alias = r.json()['errors'][0]['value']
-        print("ERROR: Code: "+str(r.status_code)+", Error message: \""
+        print("Error Code "+str(r.status_code)+": \""
                              +errMsg+"\", Task alias: "+alias)
     else:
         print("Added hab to %s!" % tod.name)
@@ -120,7 +141,6 @@ for tid in matchDict:
                 elif tod.dueToday == 'No':
                     r = main.complete_hab(hab)
                     print('Completed daily hab %s' % hab.name)
-                    print(r)
                 else:
                     print("error in daily Hab")
             elif hab.completed == True:
@@ -144,9 +164,9 @@ for tid in matchDict:
                     if tod.dueToday == 'No':
                         r = main.complete_hab(hab)
                         if r.ok == True:
-                            print('Completed hab %s' % hab.name)
+                            print('Completed Habitica task: %s' % hab.name)
                         else:
-                            print('check hab ID %s' %tid)
+                            print('Check Habitica ID %s' %tid)
                             print(r.reason)
                         matchDict[tid]['duelast'] = 'No'
         else:

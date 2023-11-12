@@ -264,12 +264,13 @@ def get_started(configfile):
     return rv
 
 def get_uniqs(matchDict,tod_tasks,hab_tasks):
+# TODO: Rename this function
     tod_uniq = []
     hab_uniq = []
 
     for tod in tod_tasks:
         tid = tod.id
-        if tod.complete:
+        if tod.is_completed:
             if tid not in matchDict.keys():
                 tod_uniq.append(tod)
 
@@ -621,7 +622,7 @@ def update_hab_matchDict(hab_tasks, matchDict):
     tid_list = []
     expired_tids = []
     aliasError = []
-    for hab in hab_tasks: 
+    for hab in hab_tasks:
         if 'alias' in hab.task_dict.keys():
             try:
                 tid = int(hab.alias)

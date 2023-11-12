@@ -105,10 +105,10 @@ class TodTask(object):
 
     @property
     #is task complete? 0 for no, 1 for yes
-    def complete(self):
+    def is_completed(self):
         return self.__task_dict['is_completed']
     
-    @complete.setter
+    @is_completed.setter
     def complete(self, status):
         self.__task_dict['checked'] = status
     
