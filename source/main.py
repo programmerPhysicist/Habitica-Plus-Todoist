@@ -479,6 +479,7 @@ def sync_hab2todo(hab, tod):
         return new_hab
     else: 
         print("Error! Hab of incorrect type!")
+        exit(1)
 
 def sync_hab2todo_daily(hab, tod):
     from dates import parse_date_utc
@@ -595,6 +596,7 @@ def syncHistories(matchDict):
 '''
 
 def update_hab(hab):
+    # TODO: Only update when there are actual changes
     import requests
     import json
     from datetime import datetime
