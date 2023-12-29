@@ -115,19 +115,19 @@ class TodTask(object):
     @property
     #due date
     def due_date(self):
-        return self.__task_dict['due_date_utc']
+        return self.__task_dict['due']
     
     @due_date.setter
     def due_date(self, date):
-        self.__task_dict['due_date_utc'] = date
+        self.__task_dict['due'] = date
     
     @property
     #due date
     def due(self):
         from dateutil import parser
         import datetime
-        if self.__task_dict['due_date_utc'] != None:
-            date = parser.parse(self.__task_dict['due_date_utc'])
+        if self.__task_dict['due'] != None:
+            date = parser.parse(self.__task_dict['due']['date'])
             return date
         else:
             return ''
@@ -141,7 +141,7 @@ class TodTask(object):
         import pytz
         today = datetime.utcnow().replace(tzinfo=pytz.UTC)
         try:
-            wobble = parser.parse(self.__task_dict['due_date_utc']) - timedelta(hours=6) #that datetime thing is pulling todoist's due dates to my time zone
+            wobble = parser.parse(self.__task_dict['due']) - timedelta(hours=6) #that datetime thing is pulling todoist's due dates to my time zone
             dueDate = wobble.date()
         except:
             dueDate = ""
@@ -167,7 +167,7 @@ class TodTask(object):
         import pytz
         today = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
         try:
-            wobble = parser.parse(self.__task_dict['due_date_utc'])
+            wobble = parser.parse(self.__task_dict['due'])
             dueDate = wobble.date()
         except:
             dueDate = ""

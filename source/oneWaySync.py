@@ -110,6 +110,7 @@ def sync_todoist_to_habitica():
         newDict = new_hab.task_dict
         r = main.write_hab_task(newDict)
         if r.ok == False:
+            #TODO: check ['errors'], due to it sometimes not having it
             errMsg = r.json()['errors'][0]['message']
             alias = r.json()['errors'][0]['value']
             print("Error Code "+str(r.status_code)+": \""

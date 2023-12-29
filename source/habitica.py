@@ -7,8 +7,15 @@ def get_all_habtasks(auth):
     url = 'https://habitica.com/api/v3/tasks/user/'
     # TODO: handle error cases for response
     response = requests.get(url,headers=auth)
-    hab_raw = response.json()
-    hab_tasklist = hab_raw['data'] #FINALLY getting something I can work with... this will be a list of dicts I want to turn into a list of objects with class hab_tasks. Hrm. Weeeelll, if I make a class elsewhere....
+    if response.ok == True:
+        hab_raw = response.json()
+        """FINALLY getting something I can work with... this will be a list of
+           dicts I want to turn into a list of objects with class hab_tasks. 
+           Hrm. Weeeelll, if I make a class elsewhere...."""
+        hab_tasklist = hab_raw['data']
+    else:
+        hab_tasklist = []
+        print(response.reason)
     
     #keeping records of all our tasks
     hab_tasks = [] 
