@@ -105,6 +105,11 @@ def case1():
 
     return inputs
 
+def checkHeaders(headers):
+    assert headers['url'] == 'https://habitica.com'
+    assert headers['x-api-user'] == 'cd18fc9f-b649-4384-932a-f3bda6fe8102'
+    assert headers['x-api-key'] == '18f22441-2c87-6d8e-fb2a-3fa670837b5a'
+
 class TestIntegration:
     @pytest.mark.parametrize("mocked_inputs", [case1()], indirect=True)
     def test_newTaskFromTodoist(self,
@@ -123,10 +128,29 @@ class TestIntegration:
         # using get_all_habtasks() which contains requests.get(), uses the monkeypatch
         sync_todoist_to_habitica()
 
-        # verify
-        postArg = captor(any)
-        verify(requests, times=1).post(...)
-        verify(requests, times=1).put(...)
-        
+        # verify post request
+        theUrl = captor(any(str))
+        theData = captor(any(dict))
+        theHeaders = captor(any(dict))
+        verify(requests, times=1).post(url=theUrl, data=theData, headers=theHeaders)
+        assert theUrl.value == 'https://habitica.com/api/v3/tasks/user/'
+        data = theData.value
+        assert data['type'] == 'todo'
+        assert data['text'] == 'Test task 1'
+        assert data['date'] == ''
+        assert data['alias'] == '8296278113'
+        assert data['priority'] == '2'
+        assert data['attribute'] == 'str'
+        checkHeaders(theHeaders.value)
+
+        # verify put request
+        verify(requests, times=1).put(headers=theHeaders, url=theUrl, data=theData)
+        checkHeaders(theHeaders.value)
+        assert theUrl.value == 'https://habitica.com/api/v3/tasks/96935939'
+        data = theData.value
+        assert data['alias'] == '96935939'
+        assert data['text'] == 'Some test task'
+        assert data['priority'] == 1
+
         # clean-up
         unstub()
