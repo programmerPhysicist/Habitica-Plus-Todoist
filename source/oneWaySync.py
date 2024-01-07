@@ -28,6 +28,7 @@ import logging
 import configparser	
 import config
 import habitica
+import time
 
 def get_tasks(token):
     tasks = []
@@ -61,7 +62,7 @@ def sync_todoist_to_habitica():
     auth = config.get_started('auth.cfg')
 
     #Getting all complete and incomplete habitica dailies and todos
-    hab_tasks, r1 = habitica.get_all_habtasks(auth)
+    hab_tasks = habitica.get_all_habtasks(auth)
 
     # get token for todoist
     todoToken = config.getTodoistToken('auth.cfg')
@@ -101,6 +102,7 @@ def sync_todoist_to_habitica():
     hab_uniq = []
     tod_uniq, hab_uniq = main.getNewTodoTasks(matchDict, tod_tasks, hab_tasks)
 
+    tod_uniqSize = len(tod_uniq)
     for tod in tod_uniq:
         tid = tod.id
         if tod.recurring == "Yes":
@@ -108,13 +110,22 @@ def sync_todoist_to_habitica():
         else:
             new_hab = main.make_hab_from_tod(tod)
         newDict = new_hab.task_dict
+
+        if tod_uniqSize > 29:
+            # sleep to stay within rate limits
+            time.sleep(2)
         r = main.write_hab_task(newDict)
         if r.ok == False:
             #TODO: check ['errors'], due to it sometimes not having it
-            errMsg = r.json()['errors'][0]['message']
-            alias = r.json()['errors'][0]['value']
-            print("Error Code "+str(r.status_code)+": \""
-                                +errMsg+"\", Task alias: "+alias)
+            try:
+                json = r.json()
+            except:
+                print("Unknown json error!")
+            else:
+                errMsg = json['errors'][0]['message']
+                alias = json['errors'][0]['value']
+                print("Error Code "+str(r.status_code)+": \""
+                      +errMsg+"\", Task alias: "+alias)
         else:
             print("Added hab to %s!" % tod.name)
             fin_hab = main.get_hab_fromID(tid)

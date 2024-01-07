@@ -224,8 +224,12 @@ def get_hab_fromID(tid):
     url = 'https://habitica.com/api/v3/tasks/'
     url += str(tid)
     r = requests.get(headers=auth, url=url)
-    task = r.json()
-    hab = HabTask(task['data'])
+    if r.ok == True:
+        task = r.json()
+        hab = HabTask(task['data'])
+    else:
+        #TODO: log error
+        hab = HabTask()
     return hab
 
 def get_started(configfile):

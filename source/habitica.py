@@ -1,4 +1,6 @@
 '''Habitica related functions'''
+# TODO: convert to class that makes all
+# calls to Habitica
 import requests
 from hab_task import HabTask
 
@@ -29,4 +31,4 @@ def get_all_habtasks(auth):
             pass
         else:
             hab_tasks.append(item)
-    return(hab_tasks, response)
+    return hab_tasks
