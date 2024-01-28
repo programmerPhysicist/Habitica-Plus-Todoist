@@ -17,6 +17,7 @@ from todoist_api_python.endpoints import get_sync_url
 from todoist_api_python.http_requests import get
 from todoist_api_python.models import Task
 import main
+import json
 from todo_task import TodTask
 import config
 import habitica
