@@ -19,7 +19,6 @@ from todoist_api_python.models import Task
 import main
 import random
 import json
-#from hab_task import HabTask
 from todo_task import TodTask
 from datetime import datetime
 from datetime import timedelta
@@ -111,9 +110,8 @@ def sync_todoist_to_habitica():
             new_hab = main.make_hab_from_tod(tod)
         newDict = new_hab.task_dict
 
-        if tod_uniqSize > 29:
-            # sleep to stay within rate limits
-            time.sleep(2)
+        # sleep to stay within rate limits
+        time.sleep(2)
         r = main.write_hab_task(newDict)
         if r.ok == False:
             #TODO: check ['errors'], due to it sometimes not having it
