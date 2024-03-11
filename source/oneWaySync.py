@@ -2,7 +2,7 @@
 
 """
 One way sync. All the features of todoist-habitrpg; nothing newer or shinier.
-Well. Okay, not *technically* one-way--it will sync two way for simple tasks/habitica to-dos, 
+Well. Okay, not *technically* one-way--it will sync two way for simple tasks/habitica to-dos,
 just not for recurring todo tasks or dailies. I'm workin' on that.
 """
 
@@ -24,7 +24,7 @@ from datetime import datetime
 from datetime import timedelta
 # from dateutil import parser
 import logging
-import configparser	
+import configparser
 import config
 import habitica
 import time
@@ -81,7 +81,7 @@ def sync_todoist_to_habitica():
     yesterday_str = yesterday.strftime("%Y-%m-%d")
 
     """
-    Okay, I want to write a little script that checks whether or not a task is there or not and, if not, ports it. 	
+    Okay, I want to write a little script that checks whether or not a task is there or not and, if not, ports it.
     """
     matchDict = main.openMatchDict()
 
@@ -89,7 +89,7 @@ def sync_todoist_to_habitica():
     matchDict = main.update_tod_matchDict(tod_tasks, matchDict)
     matchDict = main.update_hab_matchDict(hab_tasks, matchDict)
 
-    #We'll want to just... pull all the unmatched completed tasks out of our lists of tasks. Yeah? 
+    #We'll want to just... pull all the unmatched completed tasks out of our lists of tasks. Yeah?
     tod_done = [TodTask(task) for task in get_all_completed_items(todoApi)]
     tod_uniq, hab_uniq = main.get_uniqs(matchDict, tod_done, hab_tasks)
 
@@ -114,14 +114,17 @@ def sync_todoist_to_habitica():
         time.sleep(2)
         r = main.write_hab_task(newDict)
         if r.ok == False:
-            #TODO: check ['errors'], due to it sometimes not having it
             try:
                 json = r.json()
             except:
                 print("Unknown json error!")
             else:
-                errMsg = json['errors'][0]['message']
-                alias = json['errors'][0]['value']
+                if 'errors' in json.keys():
+                    errMsg = json['errors'][0]['message']
+                    alias = json['errors'][0]['value']
+                elif 'error' in json.keys():
+                    breakpoint()
+                    errMsg = json['message']
                 print("Error Code "+str(r.status_code)+": \""
                       +errMsg+"\", Task alias: "+alias)
         else:
@@ -164,7 +167,7 @@ def sync_todoist_to_habitica():
                     else:
                         print("error, check todoist daily")
             elif hab.dueToday == False:
-                try: 
+                try:
                     matchDict[tid]['duelast']
                 except:
                     matchDict[tid]['duelast'] = 'No'
@@ -184,7 +187,7 @@ def sync_todoist_to_habitica():
                 print("error, check hab daily")
                 print(hab.id)
         elif tod.recurring == 'No':
-            if tod.complete == 0: 
+            if tod.complete == 0:
                 try:
                     hab.completed
                 except:
@@ -196,7 +199,7 @@ def sync_todoist_to_habitica():
                     fix_tod = todoApi.items.get_by_id(tid)
                     fix_tod.close()
                     print('completed tod %s' % tod.name)
-                else: 
+                else:
                     print("ERROR: check HAB %s" % tid)
                     #matchDict.pop(tid)
             elif tod.complete == 1:
@@ -210,18 +213,18 @@ def sync_todoist_to_habitica():
                         print(r.reason)
                 elif hab.completed == True:
                     continue
-                else: 
+                else:
                     print("ERROR: check HAB %s" % tid)
             else:
                 print("ERROR: check TOD %s" % tid)
         r = []
-    #    try: 
+    #    try:
     #        dueNow =  str(parser.parse(matchDict[tid]['tod'].due_date).date())
     #    except:
     #        dueNow = ''
     #    if dueNow != matchDict[tid]['hab'].date and matchDict[tid]['hab'].category == 'todo':
     #        matchDict[tid]['hab'].task_dict['date'] = dueNow
-    #        r = main.update_hab(matchDict[tid]['hab']) 
+    #        r = main.update_hab(matchDict[tid]['hab'])
 
     pkl_file = open('oneWay_matchDict.pkl','wb')
     pkl_out = pickle.Pickler(pkl_file, -1)
