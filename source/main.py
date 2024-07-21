@@ -199,6 +199,7 @@ def get_all_habtasks(auth):
     url = 'https://habitica.com/api/v3/tasks/user/'
     response = requests.get(url, headers=auth)
     hab_raw = response.json()
+
     # FINALLY getting something I can work with... this will be a list of dicts I want to turn into a list of objects
     # with class hab_tasks. Hrm. Weeeelll, if I make a class elsewhere....
     hab_tasklist = hab_raw['data']
@@ -289,17 +290,17 @@ def get_uniqs(matchDict, tod_tasks, hab_tasks):
     return tod_uniq, hab_uniq
 
 
-def getNewTodoTasks(matchDict, tod_tasks, hab_tasks):
+def getNewTodoTasks(match_dict, tod_tasks, hab_tasks):
     tod_uniq = []
     hab_uniq = []
 
     for todo in tod_tasks:
         tid = todo.id
-        if tid not in matchDict.keys():
+        if tid not in match_dict.keys():
             tod_uniq.append(todo)
     for hab in hab_tasks:
         tid = hab.id
-        if tid not in matchDict.keys():
+        if tid not in match_dict.keys():
             hab_uniq.append(hab)
 
     return tod_uniq, hab_uniq
@@ -377,7 +378,7 @@ def make_hab_from_tod(tod_task):
     new_hab = {'type':'todo'}
     new_hab['text'] = tod_task.name
     try:
-        dateListed = list(tod_task.task_dict['due_date_utc'])
+        dateListed = list(tod_task.task_dict['due'])
         dueNow = str(parser.parse(dateListed).date())
     except:
         dueNow = ''
@@ -510,7 +511,6 @@ def sync_hab2todo_daily(hab, tod):
         habDict['priority'] = 1
 
     # now = datetime.now().replace(tzinfo=pytz.utc).date()
-
     if hab.due.date() != (tod.due.date() - timedelta(days=1)):
         habDict['startDate'] = str(tod.due.date() - timedelta(days=1))
 
