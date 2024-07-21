@@ -85,23 +85,22 @@ def sync_todoist_to_habitica():
     """
     matchDict = main.openMatchDict()
 
-    #Also, update lists of tasks with matchDict file...
+    # Also, update lists of tasks with matchDict file...
     matchDict = main.update_tod_matchDict(tod_tasks, matchDict)
     matchDict = main.update_hab_matchDict(hab_tasks, matchDict)
 
-    #We'll want to just... pull all the unmatched completed tasks out of our lists of tasks. Yeah?
+    # We'll want to just... pull all the unmatched completed tasks out of our lists of tasks. Yeah?
     tod_done = [TodTask(task) for task in get_all_completed_items(todoApi)]
     tod_uniq, hab_uniq = main.get_uniqs(matchDict, tod_done, hab_tasks)
 
-    #Okay, so what if there are two matched tasks in the two uniq lists that really should be paired?
-    matchDict = main.check_newMatches(matchDict,tod_uniq,hab_uniq)
+    # Okay, so what if there are two matched tasks in the two uniq lists that really should be paired?
+    matchDict = main.check_newMatches(matchDict, tod_uniq, hab_uniq)
 
-    #Here anything new in todoist gets added to habitica
+    # Here anything new in todoist gets added to habitica
     tod_uniq = []
     hab_uniq = []
     tod_uniq, hab_uniq = main.getNewTodoTasks(matchDict, tod_tasks, hab_tasks)
 
-    tod_uniqSize = len(tod_uniq)
     for tod in tod_uniq:
         tid = tod.id
         if tod.recurring == "Yes":
